@@ -68,7 +68,6 @@ fn readFile(allocator: std.mem.Allocator) !void {
     var reader = file.reader(&fileBuffer);
 
     while (try reader.interface.takeDelimiter('\n')) |line| {
-        std.debug.print("{s}\n", .{line});
         try grid.append(allocator, try allocator.dupe(u8, line));
     }
 }
@@ -78,4 +77,59 @@ fn deinitGrid(allocator: std.mem.Allocator) !void {
         allocator.free(item);
     }
     grid.deinit(allocator);
+}
+
+pub fn challenge2() !void {
+    std.debug.print("day 4 - challenge 2\n", .{});
+
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer _ = gpa.deinit();
+
+    const allocator = gpa.allocator();
+
+    grid = .empty;
+    defer deinitGrid(allocator) catch unreachable;
+
+    try readFile(allocator);
+
+    // const input = [_][]const u8 {
+    //     "..@@.@@@@.",
+    //     "@@@.@.@.@@",
+    //     "@@@@@.@.@@",
+    //     "@.@@@@..@.",
+    //     "@@.@@@@.@@",
+    //     ".@@@@@@@.@",
+    //     ".@.@.@.@@@",
+    //     "@.@@@.@@@@",
+    //     ".@@@@@@@@.",
+    //     "@.@.@@@.@.",
+    // };
+    // for (input) |line| {
+    //     try grid.append(allocator, try allocator.dupe(u8, line));
+    // }
+    // for (grid.items) |line| {
+    //     std.debug.print("{s}\n", .{line});
+    // }
+    // std.debug.print("\n", .{});
+    var count: usize = 0;
+    while (removePaperRolls()) |runCount| {
+        count += runCount;
+    }
+
+    std.debug.print("result: {d}\n", .{count});
+}
+
+fn removePaperRolls() ?usize {
+    var count: usize = 0;
+    for (grid.items, 0..) |line, y| {
+        for (grid.items[y], 0..) |entry, x| {
+            if (entry == '@' and checkSurroundings(y, x)) {
+                count += 1;
+                grid.items[y][x] = '.';
+            }
+        }
+        _ = line;
+        // std.debug.print("{s}\n", .{line});
+    }
+    return if (count > 0) count else null;
 }
