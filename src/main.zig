@@ -1,5 +1,5 @@
-const day3 = @import("day3.zig");
+const day4 = @import("day4.zig");
 
 pub fn main() !void {
-    try day3.challenge2();
+    try day4.challenge1();
 }
