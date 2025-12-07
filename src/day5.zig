@@ -8,7 +8,7 @@ const Range = struct {
 var ranges: std.ArrayList(Range) = undefined; // TODO sorted with combined ranges??
 
 pub fn challenge1() !void {
-    std.debug.print("day 3 - challenge 1\n", .{});
+    std.debug.print("day 5 - challenge 1\n", .{});
     var gpa: std.heap.DebugAllocator(.{}) = .init;
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
@@ -52,7 +52,7 @@ pub fn challenge1() !void {
 var consolidatedRanges: std.ArrayList(Range) = undefined;
 
 pub fn challenge2() !void {
-    std.debug.print("day 3 - challenge 1\n", .{});
+    std.debug.print("day 5 - challenge 1\n", .{});
     var gpa: std.heap.DebugAllocator(.{}) = .init;
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
