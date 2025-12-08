@@ -52,3 +52,62 @@ pub fn challenge1() !void {
 
     std.debug.print("result: {d}\n", .{splits});
 }
+
+pub fn challenge2() !void {
+    std.debug.print("day 7 - challenge 2\n", .{});
+    var gpa: std.heap.DebugAllocator(.{}) = .init;
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    var input: std.ArrayList([]u8) = try .initCapacity(allocator, 1024);
+    defer {
+        for (input.items) |item| {
+            allocator.free(item);
+        } 
+        input.deinit(allocator);
+    }
+
+    const file = try std.fs.cwd().openFile("./src/input/day7_challenge1", .{.mode = .read_only});
+    defer file.close();
+
+    var fileBuffer: [1024 * 10]u8 = undefined;
+    var reader = file.reader(&fileBuffer);
+
+    while (try reader.interface.takeDelimiter('\n')) |line| {
+        try input.append(allocator, try allocator.dupe(u8, line));
+    }
+
+    const s: usize = std.mem.indexOfScalar(u8, input.items[0], 'S').?;
+
+    var memo: std.AutoHashMap(Coordinate, u64) = .init(allocator);
+    defer memo.deinit();
+
+    const timelines: u64 = try findTimelines(&input, &memo, 1, s);
+
+    std.debug.print("result: {d}\n", .{timelines});
+}
+
+const Coordinate = struct {
+    v: usize,
+    h: usize,
+};
+
+fn findTimelines(input: *std.ArrayList([]u8), memo: *std.AutoHashMap(Coordinate, u64), v: usize, h: usize) !u64 {
+    if (v == input.items.len - 1) { // reached the end, found timeline
+        return 1;
+    }
+
+    const key: Coordinate = .{ .v = v, .h = h }; // memoized - coords have been traversed already
+    if (memo.get(key)) |cached| {
+        return cached;
+    }
+
+    var result: u64 = 0;
+    if (input.items[v][h] == '^') {
+        result = try findTimelines(input, memo, v+1, h-1) + try findTimelines(input, memo, v+1, h+1);
+    } else {
+        result = try findTimelines(input, memo, v+1, h);
+    }
+    try memo.put(key, result);
+    return result;
+}
